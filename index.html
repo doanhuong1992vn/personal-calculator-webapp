@@ -92,9 +92,9 @@
     <header class="calculator-header">
       <div class="calculator-operation" style="display: flex; justify-content: space-between">
         <div id="memory-screen"></div>
-        <div id="history-operation-screen">111 + 111 =</div>
+        <div id="history-operation-screen"></div>
       </div>
-      <div id="result-screen" class="calculator-operation-result">222</div>
+      <div id="result-screen" class="calculator-operation-result"></div>
     </header>
     <main class="calculator-body">
     </main>
@@ -130,7 +130,7 @@
         </svg>
         </span>
       </button>
-      <button type="button" class="calculator-button" onclick="clearOneChar()">
+      <button type="button" class="calculator-button" onclick="clearLastCharacter()">
         <span>
           <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" class="bi bi-eraser-fill" viewBox="0 0 16 16">
             <path d="M8.086 2.207a2 2 0 0 1 2.828 0l3.879 3.879a2 2 0 0 1 0 2.828l-5.5 5.5A2 2 0 0 1 7.879 15H5.12a2 2 0 0 1-1.414-.586l-2.5-2.5a2 2 0 0 1 0-2.828l6.879-6.879zm.66 11.34L3.453 8.254 1.914 9.793a1 1 0 0 0 0 1.414l2.5 2.5a1 1 0 0 0 .707.293H7.88a1 1 0 0 0 .707-.293l.16-.16z"/>
@@ -186,12 +186,8 @@
           </svg>
         </span>
       </button>
-      <button type="button" class="calculator-button highlight" >
-        <span>
-          <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" class="bi bi-percent" viewBox="0 0 16 16">
-            <path d="M13.442 2.558a.625.625 0 0 1 0 .884l-10 10a.625.625 0 1 1-.884-.884l10-10a.625.625 0 0 1 .884 0zM4.5 6a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm0 1a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5zm7 6a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm0 1a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z"/>
-          </svg>
-        </span>
+      <button type="button" class="calculator-button highlight" onclick="changeValueToNegativeOrPositive()">
+        <span>- / +</span>
       </button>
       <button type="button" class="calculator-button highlight" value="0" onclick="changeResultScreen(this.value)">
         <span>0</span>
