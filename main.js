@@ -2,6 +2,8 @@ const EMPTY_STRING = '';
 const ZERO = 0;
 const ONE = 1;
 const NEGATIVE_OF_1 = -1;
+const MAX_LENGTH = 11;
+const ROUNDED_INDEX = 7;
 const EQUAL_CHARACTER = '=';
 const PLUS_CHARACTER = '+';
 const MINUS_CHARACTER = '-';
@@ -10,6 +12,8 @@ const DIVIDE_BY_ZERO_ERROR_MESSAGE = "Cannot divide by zero";
 const CALCULATION_NOT_COMPLETE_ERROR_MESSAGE = "This is not a calculation";
 const FONT_SIZE_ERROR = "20px";
 const FONT_SIZE_BASE = "42px";
+const CACHE_KEY = "calculatorMemoryCache";
+const POWER_OF_E = "e+";
 
 
 
@@ -32,14 +36,12 @@ toggler.addEventListener('click', function() {
     changeSkin();
 })
 
-let memoryScreen = document.getElementById('memory-screen');
 let operationScreen = document.getElementById('history-operation-screen');
 let resultScreen = document.getElementById('result-screen');
 
 function checkErrorMessInResultScreen () {
     if (doesHasAnError()) {
-        resultScreen.innerHTML = EMPTY_STRING;
-        resultScreen.style.fontSize = FONT_SIZE_BASE;
+        setResultScreenAndFontSize(EMPTY_STRING, FONT_SIZE_BASE);
     }
 }
 
@@ -50,14 +52,31 @@ function doesHasAnError() {
 
 function changeResultScreen (value) {
     checkErrorMessInResultScreen();
-    if (!isNotCompleteOperationNow()) clearCalculator();
-    resultScreen.innerHTML += value;
+    if (!isNotCompleteOperationNow()) {
+        clearCalculator();
+    }
+    resultScreen.innerHTML = formatLengthOfResult(resultScreen.innerHTML + value);
+}
+
+function formatLengthOfResult(value) {
+    let newResult = value.toString();
+    if (newResult.includes(POWER_OF_E)) {
+        let indexOfE = newResult.indexOf(POWER_OF_E);
+        if (indexOfE > ROUNDED_INDEX + ONE) {
+            newResult = newResult.substring(ZERO, ROUNDED_INDEX) + newResult.substring(indexOfE).replace(PLUS_CHARACTER, EMPTY_STRING);
+        } else {
+            newResult = newResult.replace(PLUS_CHARACTER, EMPTY_STRING);
+        }
+    }
+    if (newResult.length > MAX_LENGTH) {
+        newResult = newResult.slice(ZERO, MAX_LENGTH);
+    }
+    return newResult;
 }
 
 function clearCalculator () {
     operationScreen.innerHTML = EMPTY_STRING;
-    resultScreen.innerHTML = EMPTY_STRING;
-    resultScreen.style.fontSize = FONT_SIZE_BASE;
+    setResultScreenAndFontSize(EMPTY_STRING, FONT_SIZE_BASE);
 }
 
 function clearLastCharacter () {
@@ -83,7 +102,9 @@ function changeOperation (operand) {
         operationScreen.innerHTML = `${lastOperator} ${operand}`;
     } else {
         try {
-            operationScreen.innerHTML = `${eval(operationScreen.innerHTML + lastOperator)} ${operand}`;
+            let result = eval(operationScreen.innerHTML + lastOperator);
+            result = formatLengthOfResult(result);
+            operationScreen.innerHTML = `${result} ${operand}`;
         } catch (e) {
             operationScreen.innerHTML = operationScreen.innerHTML.slice(ZERO, NEGATIVE_OF_1) + operand;
         }
@@ -97,35 +118,45 @@ function isNotCompleteOperationNow () {
     return currentOperationScreen.charAt(lastIndex) !== EQUAL_CHARACTER;
 }
 
+function setResultScreenAndFontSize(result, fontSize) {
+    resultScreen.innerHTML = result;
+    resultScreen.style.fontSize = fontSize;
+}
+
 function getResult () {
-    if (resultScreen.innerHTML === EMPTY_STRING) resultScreen.innerHTML = `${ZERO}`;
-    if (operationScreen.innerHTML === EMPTY_STRING) operationScreen.innerHTML = `${resultScreen.innerHTML} ${EQUAL_CHARACTER}`
+    if (resultScreen.innerHTML === EMPTY_STRING) {
+        resultScreen.innerHTML = `${ZERO}`;
+    }
+    if (operationScreen.innerHTML === EMPTY_STRING) {
+        operationScreen.innerHTML = `${resultScreen.innerHTML} ${EQUAL_CHARACTER}`;
+    }
     if (isNotCompleteOperationNow()) {
         const lastOperator = formatLastOperator();
         try {
-            resultScreen.innerHTML = eval(operationScreen.innerHTML + lastOperator);
+            const result = eval(operationScreen.innerHTML + lastOperator);
+            resultScreen.innerHTML = formatLengthOfResult(result);
         } catch (e) {
-            resultScreen.innerHTML = CALCULATION_NOT_COMPLETE_ERROR_MESSAGE;
-            resultScreen.style.fontSize = FONT_SIZE_ERROR;
+            setResultScreenAndFontSize(CALCULATION_NOT_COMPLETE_ERROR_MESSAGE, FONT_SIZE_ERROR);
         }
         operationScreen.innerHTML = `${operationScreen.innerHTML} ${lastOperator} ${EQUAL_CHARACTER}`;
     } else {
         try {
-            resultScreen.innerHTML = eval(operationScreen.innerHTML.slice(ZERO, NEGATIVE_OF_1));
+            const result = eval(operationScreen.innerHTML.slice(ZERO, NEGATIVE_OF_1));
+            resultScreen.innerHTML = formatLengthOfResult(result);
         } catch (e) {
-            resultScreen.innerHTML = CALCULATION_NOT_COMPLETE_ERROR_MESSAGE;
-            resultScreen.style.fontSize = FONT_SIZE_ERROR;
+            setResultScreenAndFontSize(CALCULATION_NOT_COMPLETE_ERROR_MESSAGE, FONT_SIZE_ERROR);
         }
     }
     if (operationScreen.innerHTML.includes(STRING_OF_DIVIDE_BY_ZERO)) {
-        resultScreen.innerHTML = DIVIDE_BY_ZERO_ERROR_MESSAGE;
-        resultScreen.style.fontSize = FONT_SIZE_ERROR;
+        setResultScreenAndFontSize(DIVIDE_BY_ZERO_ERROR_MESSAGE, FONT_SIZE_ERROR);
     }
 }
 
 function changeValueToNegativeOrPositive() {
     checkErrorMessInResultScreen();
-    if (!isNotCompleteOperationNow()) operationScreen.innerHTML = EMPTY_STRING;
+    if (!isNotCompleteOperationNow()) {
+        operationScreen.innerHTML = EMPTY_STRING;
+    }
     if (resultScreen.innerHTML === EMPTY_STRING) {
         resultScreen.innerHTML = MINUS_CHARACTER;
     } else if (resultScreen.innerHTML.startsWith(PLUS_CHARACTER)) {
@@ -136,4 +167,49 @@ function changeValueToNegativeOrPositive() {
         resultScreen.innerHTML = `${MINUS_CHARACTER}${resultScreen.innerHTML}`;
     }
 }
+
+function getCache() {
+    return localStorage.getItem(CACHE_KEY);
+}
+
+let memoryScreen = document.getElementById('memory-screen');
+
+function setCacheAndMemoryScreen(value) {
+    const formatValue = formatLengthOfResult(value);
+    localStorage.setItem(CACHE_KEY, formatValue);
+    memoryScreen.innerHTML = `M:${formatValue}`;
+}
+
+function increaseMemoryCache() {
+    const valueCached = getCache();
+    const valueToCache = isNaN(Number.parseFloat(resultScreen.innerHTML)) ? ZERO : resultScreen.innerHTML;
+    if (valueCached === null) {
+        setCacheAndMemoryScreen(valueToCache);
+    } else {
+        const newValueToCache = Number.parseFloat(valueCached) + Number.parseFloat(valueToCache);
+        setCacheAndMemoryScreen(newValueToCache);
+    }
+}
+
+function decreaseMemoryCache() {
+    const valueCached = getCache();
+    const valueToCache = isNaN(Number.parseFloat(resultScreen.innerHTML)) ? ZERO : resultScreen.innerHTML;
+    if (valueCached !== null) {
+        const newValueToCache = Number.parseFloat(valueCached) - Number.parseFloat(valueToCache);
+        setCacheAndMemoryScreen(newValueToCache);
+    }
+}
+
+function clearMemoryCache() {
+    localStorage.removeItem(CACHE_KEY);
+    memoryScreen.innerHTML = EMPTY_STRING;
+}
+
+function showCacheOnResultScreen() {
+    const valueCached = getCache();
+    if (valueCached !== null) {
+        resultScreen.innerHTML = valueCached;
+    }
+}
+
 

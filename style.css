@@ -47,7 +47,7 @@ body {
     -webkit-backdrop-filter: blur(40px);
     backdrop-filter: blur(40px);
     box-shadow: inset 0 2px 1px rgba(255, 255, 255, 0.1);
-    min-height: 75px;
+    min-height: 95px;
 }
 .calculator-body {
     position: relative;
@@ -57,7 +57,7 @@ body {
     border-bottom-right-radius: 15px;
     -webkit-backdrop-filter: blur(20px);
     backdrop-filter: blur(20px);
-    min-height: 280px;
+    min-height: 290px;
 }
 .calculator-operation {
     font-size: 18px;
@@ -82,17 +82,25 @@ body {
     user-select: none;
     -webkit-backdrop-filter: blur(6px);
     backdrop-filter: blur(6px);
-    transition: all 0.2s ease-in-out;
     will-change: auto;
     z-index: 2;
 }
-.calculator-button:hover, .calculator-button:focus {
+
+.calculator-button:hover {
     box-shadow: 0 10px 25px rgba(4, 37, 100, 0.12);
     border-radius: 4px;
     background-color: var(--button-bg-hover);
     border-color: rgba(255, 255, 255, 0.15);
     z-index: 5;
-    transform: scale(1.35);
+    transition: all 0.1s linear;
+}
+.calculator-button:active {
+    box-shadow: 0 10px 25px rgba(4, 37, 100, 0.12);
+    border-radius: 4px;
+    background-color: var(--button-bg-hover);
+    border-color: rgba(255, 255, 255, 0.15);
+    z-index: 5;
+    transform: scale(1.3);
 }
 .calculator-button:focus {
     outline: none;
@@ -109,7 +117,7 @@ body {
 }
 .calculator-button-wrapper {
     position: absolute;
-    top: calc(117px + 15px);
+    top: calc(140px + 15px);
     right: 15px;
     bottom: 15px;
     left: 15px;
